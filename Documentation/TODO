@@ -1,0 +1,21 @@
+ - support "-z" option for NUL-separated records
+
+ - individual limits for substitution/addition/deletion; they are all
+   worth 1 "point" right now, but there's no reason they couldn't be
+   different
+
+ - other types of edits. For example, case-changing (like s/A/a/) might
+   cost less than regular substitution. Another example would be
+   equivalent unicode or related unicode characters (for example, "é"
+   and "e" might cost less than an arbitrary substitution).
+
+ - handle multi-byte characters better. This might not be possible
+   without losing efficiency for the single-byte case, though.
+
+ - right now, "fuzzydups -b foo" will compare each input record against
+   "foo", but also against all previous input. There should perhaps be a
+   "base-only" mode.
+
+ - use less memory; right now we actually store a trie of keys mapping
+   to string versions of the keys. We could instead rebuild the key as
+   we walk, saving all of the string space.

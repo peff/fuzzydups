@@ -1,0 +1,67 @@
+fuzzymunge(1)
+============
+
+NAME
+----
+fuzzymunge - Convert inputs lines to fuzzy matches
+
+SYNOPSIS
+--------
+[verse]
+fuzzymunge [limitopts] [-b <base>] [-i <input> ...] [-o <output> ...]
+
+DESCRIPTION
+-----------
+Fuzzymunge reads a set of "base" records from stdin, one per line,
+ending with a blank line. It then reads a set of "input" records from
+stdin. For each input record, the closest match from the set of base
+records is printed to stdout. If no match is found below the edit
+distance limit, a warning is printed to stderr and the input record is
+printed unchanged.
+
+Input/Output Options
+~~~~~~~~~~~~~~~~~~~~
+
+-b <file>:: Read base records from <file> instead of from stdin.
+
+-i <file>:: Read input records from <file> instead of from stdin.
+
+-o <file>:: Write output to <file> instead of to stdout.
+
+Multiple input and output files can be given. If both are given, the
+number of input and output files must be equal. The contents of the
+first input file are munged into the first output file, and so on.
+This can be more efficient than invoking fuzzymunge multiple times, as
+the base records need only be read and sorted once.
+
+include::limit-options.txt[]
+
+EXAMPLES
+--------
+
+Correct a stale list based on a master database. Note that we correct
+"baz" to "bar", but mark "bogus" as uncorrectable.
+
+-----------------------------------------
+$ cat good-words
+foo
+bar
+moof
+whee
+
+$ cat input
+foo
+baz
+bogus
+
+$ fuzzymunge -b good-words -l 1 <input >output
+warning: no match for 'bogus'
+$ cat output
+foo
+bar
+bogus
+-----------------------------------------
+
+SEE ALSO
+--------
+fuzzydups(1)

@@ -1,0 +1,97 @@
+fuzzydups(1)
+============
+
+NAME
+----
+fuzzydups - Find duplicates with fuzzy matching
+
+SYNOPSIS
+--------
+[verse]
+fuzzydups [limitopts] [-b <base>]
+
+DESCRIPTION
+-----------
+Fuzzydups reads a set of records, one per line, on its standard input
+and searches for duplicate lines which match within a given edit
+distance.  Each pair of duplicates is printed on its standard output as
+two lines, with each pair separated from other pairs by a blank line.
+The first line of the pair contains the input record that was found to
+be a duplicate. The second line contains the matched record.
+
+The records are processed sequentially. Each record that is read is
+compared to those that came before, and the single closest duplicate (if
+any exist within the specified edit distance) is printed. The record is
+then added to the set to which future records will be compared.
+
+OPTIONS
+-------
+
+-b <file>:: Read a "base" set of records, one per line, from <file>.
+            These records are not compared to previous records for
+            duplicates, but can themselves be found as duplicates for
+            records given on stdin.
+
+include::limit-options.txt[]
+
+EXAMPLES
+--------
+
+Find fuzzy duplicates with edit distance 1 in a single list. Note that
+we find "bar" and "baz" which differ by 1, but there is no duplicate for
+"foo".
+
+-----------------------------------------
+$ cat input
+foo
+bar
+baz
+$ fuzzydups -l 1 <input
+baz
+bar
+-----------------------------------------
+
+Allow a very high edit distance. Note that "baz" is found to be a
+duplicate of "bar"; even though it matches "foo" with a distance of 3,
+"bar" is much closer. Also note that "bar" is matched with "foo",
+because we have not yet seen "baz".
+
+-----------------------------------------
+$ cat input
+foo
+bar
+baz
+$ fuzzydups -l 3 <input
+bar
+foo
+
+baz
+bar
+-----------------------------------------
+
+Find fuzzy duplicates in a list that are also in some master list.
+Note that even though "badword" and "badwords" have an edit distance of
+1, we do not print duplicates from the base list.
+
+-----------------------------------------
+$ cat taboo
+badword
+badwords
+$ cat input
+goodword
+b@dword
+$ fuzzydups -b taboo -l 1 <input
+b@dword
+badword
+-----------------------------------------
+
+BUGS
+----
+Fuzzydups treats input as a sequence of bytes. Multi-byte characters
+may therefore cause unnaturally large edit distances (or even create
+edit distance where there is none, in the case of characters with
+multiple representations).
+
+SEE ALSO
+--------
+fuzzymunge(1)

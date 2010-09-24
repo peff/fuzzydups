@@ -1,0 +1,21 @@
+Limit Options
+~~~~~~~~~~~~~
+
+-l <num>:: Use a static edit distance limit of <num>. This means that
+           two records are considered to match if they differ by a
+           combined total of at most <num> additions, deletions, or
+           substitutions.
+
+-d <num>:: Use a dynamic edit distance, in which for every <num>
+           characters in the input string, we increase the allowable
+           edit distance by 1. This helps avoid false positives in very
+           short strings, while still allowing a reasonable number of
+           edits in longer strings.
+
+-m <num>:: Set the maximum allowable dynamic edit distance to <num>. The
+           higher the edit distance, the more time we must spend
+           analyzing strings. For long strings which would have a very
+           high edit distance, this reduces the amount of time we spend
+           finding that they do not match.
+
+The default limit is `-d 5 -m 3`.
