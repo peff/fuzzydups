@@ -30,4 +30,11 @@ struct util_array {
 #define UTIL_ARRAY_INIT { NULL, 0, 0 }
 void util_array_push(struct util_array *, const char *);
 
+struct util_atomicfile {
+  FILE *fh;
+  char fn[4096];
+};
+void util_atomicfile_open(struct util_atomicfile *af, const char *base);
+void util_atomicfile_close(struct util_atomicfile *af, const char *dest);
+
 #endif /* UTIL_H */

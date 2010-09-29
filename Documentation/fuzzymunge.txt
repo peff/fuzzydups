@@ -8,7 +8,7 @@ fuzzymunge - Convert inputs lines to fuzzy matches
 SYNOPSIS
 --------
 [verse]
-fuzzymunge [limitopts] [-b <base>] [-i <input> ...] [-o <output> ...]
+fuzzymunge [limitopts] [-b <base>] [-i] [<file...>]
 
 DESCRIPTION
 -----------
@@ -24,15 +24,13 @@ Input/Output Options
 
 -b <file>:: Read base records from <file> instead of from stdin.
 
--i <file>:: Read input records from <file> instead of from stdin.
+-i:: Edit files in-place.
 
--o <file>:: Write output to <file> instead of to stdout.
-
-Multiple input and output files can be given. If both are given, the
-number of input and output files must be equal. The contents of the
-first input file are munged into the first output file, and so on.
-This can be more efficient than invoking fuzzymunge multiple times, as
-the base records need only be read and sorted once.
+<files...>::
+A list of files to read as input. If `-i` is not used, the munged
+contents are written to stdout. If `-i` is used, each file is read,
+written to a tempfile, and the tempfile atomically renamed over the
+original.
 
 include::limit-options.txt[]
 

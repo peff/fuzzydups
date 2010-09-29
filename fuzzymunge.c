@@ -8,7 +8,7 @@
 void die_usage(void) {
   die("%s",
 "usage: fuzzymunge [-v] [-l limit] [-d limit]\n"
-"                  [-b base] [-i input] [-o output]\n"
+"                  [-b base] [-i] [<files...>]\n"
 );
 }
 
@@ -36,13 +36,11 @@ int main(int argc, char **argv)
   struct trie t;
   struct util_limit ul = UTIL_LIMIT_INIT;
   struct util_array bases = UTIL_ARRAY_INIT;
-  struct util_array inputs = UTIL_ARRAY_INIT;
-  struct util_array outputs = UTIL_ARRAY_INIT;
+  int inplace = 0;
 
-  while ((opt = getopt(argc, argv, "b:i:o:" UTIL_LIMIT_OPTS)) != -1) {
+  while ((opt = getopt(argc, argv, "b:i" UTIL_LIMIT_OPTS)) != -1) {
     if (opt == 'b') util_array_push(&bases, optarg);
-    else if(opt == 'i') util_array_push(&inputs, optarg);
-    else if(opt == 'o') util_array_push(&outputs, optarg);
+    else if(opt == 'i') inplace = 1;
     else if (!util_limit_opt(&ul, opt, optarg))
       die_usage();
   }
@@ -58,18 +56,20 @@ int main(int argc, char **argv)
       util_trie_read(&t, util_open(bases.d[i], "r"));
   }
 
-  if (!inputs.len) {
-    if (outputs.len > 1)
-      die("can only use one output when reading from stdin");
-    munge(&t, stdin, outputs.len ? util_open(outputs.d[0], "w") : stdout, &ul);
-  }
-  else {
-    unsigned i;
-    if (outputs.len && outputs.len != inputs.len)
-      die("number of inputs and outputs must match");
-    for (i = 0; i < inputs.len; i++)
-      munge(&t, util_open(inputs.d[i], "r"),
-                outputs.len ? util_open(outputs.d[i], "w") : stdout, &ul);
+  if (!*argv)
+    munge(&t, stdin, stdout, &ul);
+
+  for (; *argv; argv++) {
+    FILE *in = util_open(*argv, "r");
+
+    if (inplace) {
+      struct util_atomicfile tmp;
+      util_atomicfile_open(&tmp, *argv);
+      munge(&t, in, tmp.fh, &ul);
+      util_atomicfile_close(&tmp, *argv);
+    }
+    else
+      munge(&t, in, stdout, &ul);
   }
 
   return 0;

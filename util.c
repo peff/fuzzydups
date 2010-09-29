@@ -3,6 +3,9 @@
 #include <string.h>
 #include <errno.h>
 #include <stdarg.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
 
 void die(const char *fmt, ...)
 {
@@ -107,4 +110,33 @@ void util_trie_read(struct trie *t, FILE *in)
     if (!*line) break;
     util_trie_insert(t, line);
   }
+}
+
+void util_atomicfile_open(struct util_atomicfile *af, const char *base)
+{
+  int fd;
+  struct stat st;
+
+  snprintf(af->fn, sizeof(af->fn), "%s.XXXXXX", base);
+  fd = mkstemp(af->fn);
+  if (fd < 0)
+    die_errno("unable to create tempfile '%s.XXXXXX'", base);
+  af->fh = fdopen(fd, "w");
+
+  if (stat(base, &st) < 0) {
+    if (errno != ENOENT)
+      die_errno("unable to stat %s", base);
+  }
+  else {
+    if (chmod(af->fn, st.st_mode) < 0)
+      die_errno("unable to chmod %s", af->fn);
+  }
+}
+
+void util_atomicfile_close(struct util_atomicfile *af, const char *dest)
+{
+  if (fclose(af->fh) == EOF)
+    die_errno("error writing to %s", af->fn);
+  if (rename(af->fn, dest) < 0)
+    die_errno("unable to rename %s to %s", af->fn, dest);
 }
