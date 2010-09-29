@@ -6,10 +6,7 @@
 #include <unistd.h>
 
 void die_usage(void) {
-  die("%s",
-"usage: fuzzymunge [-v] [-l limit] [-d limit]\n"
-"                  [-b base] [-i] [<files...>]\n"
-);
+  die("usage: fuzzymunge [-l limit] [-d limit] [-b base] [-i] [<files...>]");
 }
 
 static void munge(const struct trie *t, FILE *in, FILE *out,
