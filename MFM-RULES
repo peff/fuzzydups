@@ -1,4 +1,6 @@
 ./rules
+doc/asciidoc/man
+doc/binman
 shell/install/allbin
 c/base
 base
